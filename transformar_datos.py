@@ -83,9 +83,6 @@ print(df_limpio['Formato'].value_counts())
 # Imprimimos directamente los títulos filtrados sin bucles de por medio
 print(df_limpio[df_limpio['Formato'] == 'Físico']['Title'])
 
-# 1. Por seguridad, asegurarnos de que 'Alexei' se queda como Ebook por si se coló por coincidencia
-df_limpio.loc[df_limpio['Title'].str.contains('Alexei', case=False, na=False), 'Formato'] = 'Ebook'
-
 # 2. Eliminar el libro 'Mate' si está duplicado con 'Alfa'
 # Buscamos el índice de la fila donde el título sea 'Mate'
 indices_mate = df_limpio[df_limpio['Title'].str.contains('Mate', case=False, na=False)].index
@@ -97,3 +94,54 @@ df_limpio = df_limpio.drop(indices_mate)
 indices_rightmove = df_limpio[df_limpio['Title'].str.contains('Right Move', case=False, na=False)].index
 # 2. Usamos drop para eliminar esas filas del DataFrame
 df_limpio = df_limpio.drop(indices_rightmove)
+
+
+#----------------------------------------------------------------------------
+# Dividir columna título en 3 columnas: título, nombre saga, y núm saga
+# ----------------------------------------------------------------------------
+
+# 1 Extraer los textos de los paréntesis y dejarlos como dos columnas auxiliares sin alterar el texto. 
+df_limpio['parentesis_1'] = df_limpio['Title'].str.extract(r'\(([^)]+)\)', expand=False)
+todos_p = df_limpio['Title'].str.findall(r'\(([^)]+)\)')
+df_limpio['parentesis_2'] = todos_p.apply(lambda x: x[1] if isinstance(x, list) and len(x) > 1 else None)
+
+# 2 Creamos la columna Edicion
+es_edicion_1 = df_limpio['parentesis_1'].str.contains(r'Spanish|Edition|Version|latino', case=False, na=False)
+df_limpio['Edicion'] = df_limpio['parentesis_2']
+df_limpio.loc[es_edicion_1, 'Edicion'] = df_limpio['parentesis_1']
+df_limpio['Edicion'] = df_limpio['Edicion'].fillna('None')
+
+# 3 Nombre_Saga y Orden_Saga
+# Creamos una columna auxiliar con el contenido del primer paréntesis que NO sea edición
+# Si el primer paréntesis era una edición, dejamos un valor vacío (None)
+primer_parentesis_saga = df_limpio['parentesis_1'].copy()
+primer_parentesis_saga[es_edicion_1] = None
+
+# Columna Nombre_Saga: Quitamos todo lo que venga después de coma, #, nº para quedarnos solo con el nombre de la saga
+df_limpio['Nombre_Saga'] = primer_parentesis_saga.str.replace(r',.*|#.*|n°.*', '', regex=True).str.strip()
+# Los huecos vacíos o sin saga son libros únicos
+df_limpio['Nombre_Saga'] = df_limpio['Nombre_Saga'].fillna('Libro único')
+
+# Columna Orden_Saga: Extraemos el número de saga si existe, sino dejamos 0.Primeor buscamos # o nº si existe
+df_limpio['Orden_Saga'] = primer_parentesis_saga.str.extract(r'(?:#|n°)\s*(\d+)', expand=False)
+# y si no tiene número de saga, dejamos 0
+df_limpio['Orden_Saga'] = df_limpio['Orden_Saga'].fillna(0)
+
+# 4 Limpiar columna titulo original
+df_limpio['Title'] = df_limpio['Title'].str.replace(r'\s*\([^)]*\)', '', regex=True).str.strip()
+# Comprobación
+print('Resultado final:')
+print(df_limpio[['Title', 'Nombre_Saga', 'Orden_Saga', 'Edicion']].head(10))
+
+# COMPROBAR LAS 2 PRIMERAS FILAS TRAS LAS TRANSFORMACIONES
+print('Primeras filas tras las transformaciones:')
+print(df_limpio.head(2))
+print('Listado de columnas:', list(df_limpio.columns))
+
+# Eliminar  columnas parentesis 1 y parentesis 2
+df_limpio = df_limpio.drop(columns=['parentesis_1',
+                                    'parentesis_2',
+                                    'Date Added', 
+                                    'Binding',
+                                    'Year Published'])
+print('Listado de columnas:', list(df_limpio.columns))

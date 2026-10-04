@@ -13,11 +13,11 @@ combinando el desarrollo técnico con la pasión por tener la biblioteca perfect
 
 Para montar este pipeline de datos de principio a fin, utilizo una combinación de herramientas clave:
 
-[x] Python (Pandas): Para la automatización del preprocesamiento, limpieza de datos, extracción de sagas y clasificación automatizada por autor.
+- [x] Python (Pandas): Para la automatización del preprocesamiento, limpieza de datos, extracción de sagas y clasificación automatizada por autor.
 
-[x] SQL: Como base de datos relacional para almacenar de forma persistente la información limpia.
+- [x] SQL: Como base de datos relacional para almacenar de forma persistente la información limpia.
 
-[x] Power BI: Para diseñar un informe interactivo, visual y profesional donde exprimir al máximo las métricas de lectura.
+- [x] Power BI: Para diseñar un informe interactivo, visual y profesional donde exprimir al máximo las métricas de lectura.
 
 
 **✨ Automatización y Flujo de Datos**

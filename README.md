@@ -1,4 +1,5 @@
-**MI RINCÓN DE LECTURA**
+**MI RINCÓN DE LECTURA** 🚀📚
+
 Un santuario digital para controlar mis lecturas, dominar mi wishlist infinita y sobrevivir al caos de Goodreads con un poco de magia de código.
 
 Tener visualmente todos los libros leídos, filtrarlos por puntuación, autoras o género de forma clara y atractiva es el sueño de cualquier lector. 
@@ -9,6 +10,7 @@ combinando el desarrollo técnico con la pasión por tener la biblioteca perfect
 
 
 **🛠 El Arsenal Tecnológico**
+
 Para montar este pipeline de datos de principio a fin, utilizo una combinación de herramientas clave:
 
 [x] Python (Pandas): Para la automatización del preprocesamiento, limpieza de datos, extracción de sagas y clasificación automatizada por autor.
@@ -19,6 +21,7 @@ Para montar este pipeline de datos de principio a fin, utilizo una combinación 
 
 
 **✨ Automatización y Flujo de Datos**
+
 La estantería es un entorno dinámico donde constantemente entran nuevas incorporaciones a la wishlist y se actualizan lecturas. Para evitar procesos manuales repetitivos, el flujo está diseñado de forma automatizada:
 
 1. Ingesta de datos: Exportación de la base de datos de libros en formato CSV.

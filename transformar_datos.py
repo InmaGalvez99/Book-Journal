@@ -211,6 +211,23 @@ def clasificar_generos(row):
         return ('Romance', 'Sport Romance')
     elif saga == 'Rubí de sangre':
         return ('Fantasía', 'Fantasía Romántica')
+    elif saga == 'Kings of Sin':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'Pecados':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'Dirty Air':
+        return ('Romance', 'Sport Romance')
+    elif saga == 'Dreamland Billionaires':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'Gold Rush Runch':
+        return ('Romance',  'Cowboy Romance')
+    elif saga == 'Royal Elite':
+        return ('Romance','Dark Romance')
+    elif saga == 'Speed':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Villain':
+        return ('Romance', 'Dark Romance')
+    
     
 
 # 2. REGLAS POR TITULO: si el título es de un libro independiente 
@@ -244,6 +261,41 @@ def clasificar_generos(row):
         return ('Romance', 'Romance Comtemporáneo')
     elif 'El error vive arriba' in str(titulo):
         return ('Romance', 'Romance Contemporáneo')
+    elif 'Fever Dream' in str(titulo):
+        return ('Romance', 'Cowboy Romance')
+    elif 'Striker' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'Defender' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'Mariposa' in str(titulo):
+        return ('Romance', 'Romance Militar')
+    elif 'El camino a Rhodes' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'De Lukov, con amor' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'Bourbon & Lies' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'La luz de todos nuestros otoños' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Fuera de juego' in str(titulo):
+       return ('Romance', 'Sport Romance')
+    elif 'Si fuera amor' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'Muñeca Rusa' in str(titulo):
+        return ('Romance', 'Mafia Romance')
+    elif 'Criaturas despiadadas' in str(titulo):
+        return ('Romance', 'Mafia Romance')
+    elif 'La voz de Archer'in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Turno de noche' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'Hate mail' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'End game' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    
+
+    
 
 # 3. MÁS AUTORES O SAGAS (Aquí irás añadiendo tus siguientes reglas poco a poco)
     # elif autor == 'Nombre de Autora':
@@ -310,6 +362,33 @@ def clasificar_generos(row):
         return ('Romance', 'Romance Contemporáneo')
     elif autor == 'Eva Winners':
         return ('Romance', 'Mafia Romance')
+    elif autor == 'Peyton Corinne':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Brynne Weaver':
+        return ('Romance', 'Dark Romance')
+    elif autor == 'Elena Armas':
+        return ('Romance', 'Romance Contemporáneo')
+    elif autor == 'Lynn Painter':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Alexandra Moody':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Lisina Coney':
+        return ('Romance', 'Romance Contemporáneo')
+    elif autor == 'Sierra Simone':
+        return ('Romance', 'Dark Romance')
+    elif autor =='Vi Keeland':
+        return ('Romance', 'Romance Contemporáneo')
+    elif autor == 'Leigh Rivers':
+        return ('Romance', 'Dark Romance')
+    elif autor == 'Nira Strauss':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Becka Mack':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Bal Khabra':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Kandi Steiner':
+        return ('Romance', 'Sport Romance')
+ 
     
 
 
@@ -328,3 +407,96 @@ print(resultado_autor[['Title', 'Nombre_Saga', 'Género', 'Subgénero']].head(3)
 resultado_libro = df_limpio[df_limpio['Title'].str.contains('Maldita Fortuna', case=False, na=False)]
 print('Resultado del libro Maldita Fortuna:')
 print(resultado_libro[['Title', 'Author', 'Género', 'Subgénero']])
+
+# Comprobar los libros por clasificar
+
+pendientes = df_limpio [df_limpio['Género']=='Por Clasificar']
+print(f"¡Te quedan {len(pendientes)} libros por clasificar!")
+print(pendientes[['Title', 'Author', 'Nombre_Saga']].head(15))
+
+
+# ----------------------------------------------------------------------------------------
+# CARGA DE DATOS BBDD SQL SERVER
+# ----------------------------------------------------------------------------------------
+
+from sqlalchemy import create_engine
+import urllib
+
+# 1. Configuración de la conexión a tu SQL Server local
+server = 'INMAPC\SQLEXPRESS'          # Cambia esto si tu instancia tiene otro nombre (ej: 'localhost\\SQLEXPRESS')
+database_name = 'DB_BookJournal' # El nombre de tu base de datos actual
+
+# Creamos la cadena de conexión usando autenticación de Windows
+params = urllib.parse.quote_plus(
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={server};"
+    f"DATABASE={database_name};"
+    f"Trusted_Connection=yes;"
+)
+
+engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
+
+# 2. Volcamos el DataFrame limpio a SQL Server
+# 'if_exists="replace"' borra la tabla antigua y la sustituye por la nueva con todos los cambios y géneros actualizados
+df_limpio.to_sql('Libros_Limpios', con=engine, if_exists='replace', index=False)
+
+print("¡Carga completada con éxito! La base de datos en SQL Server está actualizada. ")
+
+
+
+# -------------------------------------------------
+# CARGAR DATOS A SQL
+# -------------------------------------------------
+
+import pandas as pd
+from sqlalchemy import create_engine
+import urllib
+
+# 1. CREAR LAS DIMENSIONES A PARTIR DE TU `df_limpio` YA EXISTENTE
+dim_autores = df_limpio[['Author']].drop_duplicates().reset_index(drop=True)
+dim_autores['Autor_ID'] = dim_autores.index + 1
+
+dim_publisher = df_limpio[['Publisher']].drop_duplicates().reset_index(drop=True)
+dim_publisher['Publisher_ID'] = dim_publisher.index + 1
+
+dim_generos = df_limpio[['Género', 'Subgénero']].drop_duplicates().reset_index(drop=True)
+dim_generos['Genero_ID'] = dim_generos.index + 1
+
+dim_sagas = df_limpio[['Nombre_Saga']].drop_duplicates().reset_index(drop=True)
+dim_sagas['Saga_ID'] = dim_sagas.index + 1
+
+# 2. CONSTRUIR LA TABLA DE HECHOS (Fact_Libros)
+fact_libros = df_limpio.merge(dim_autores, on='Author', how='left')
+fact_libros = fact_libros.merge(dim_publisher, on='Publisher', how='left')
+fact_libros = fact_libros.merge(dim_generos, on=['Género', 'Subgénero'], how='left')
+fact_libros = fact_libros.merge(dim_sagas, on='Nombre_Saga', how='left')
+
+columnas_fact = [
+    'Book Id', 'Title', 'ISBN', 'ISBN13', 'My Rating', 'Number of Pages', 
+    'Original Publication Year', 'Date Read', 'Exclusive Shelf', 'Read Count', 
+    'Formato', 'Edicion', 'Orden_Saga',
+    'Autor_ID', 'Publisher_ID', 'Genero_ID', 'Saga_ID'
+]
+fact_libros = fact_libros[columnas_fact]
+
+# 3. CONFIGURACIÓN DE LA CONEXIÓN A SQL SERVER (con la 'r' para evitar el warning)
+server = r'INMAPC\SQLEXPRESS'
+database_name = 'DB_BookJournal'
+
+params = urllib.parse.quote_plus(
+    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
+    f"SERVER={server};"
+    f"DATABASE={database_name};"
+    f"Trusted_Connection=yes;"
+)
+
+engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
+
+# 4. CARGA DE LAS TABLAS A SQL SERVER
+dim_autores.to_sql('Dim_Autores', con=engine, if_exists='replace', index=False)
+dim_publisher.to_sql('Dim_Publisher', con=engine, if_exists='replace', index=False)
+dim_generos.to_sql('Dim_Generos', con=engine, if_exists='replace', index=False)
+dim_sagas.to_sql('Dim_Sagas', con=engine, if_exists='replace', index=False)
+fact_libros.to_sql('Fact_Libros', con=engine, if_exists='replace', index=False)
+
+print("¡Modelo en estrella creado y volcado a SQL Server con éxito! ")

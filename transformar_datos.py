@@ -40,7 +40,8 @@ libros_físicos = [
     'God of Malice',
     'God of Pain',
     'God of War',
-    'God of Wrath',
+    'God of Wrath'
+    'God of Ruin',
     'God of Fury',
     'Twisted games',
     'Flawless',
@@ -145,3 +146,185 @@ df_limpio = df_limpio.drop(columns=['parentesis_1',
                                     'Binding',
                                     'Year Published'])
 print('Listado de columnas:', list(df_limpio.columns))
+
+
+# -------------------------------------------------------------------------------------------
+# COLUMNAS GÉNERO Y SUBGÉNERO
+# -------------------------------------------------------------------------------------------
+
+def clasificar_generos(row):
+    saga = row['Nombre_Saga']
+    autor = row['Author']
+    titulo = row['Title']
+
+# 1. REGLAS PARA SAGA: barre de un plumazo los libros de la misma saga
+
+    if saga == 'Clan Z':
+        return ('Romance', 'Mafia Romance')
+    elif saga == 'No es amor':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'Bride':
+        return ('Fantasía', 'Romance Paranormal')
+    elif saga == 'Legacy of Gods':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Chestnut Springs':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'Rose Hill':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'D.C Stars':
+        return ('Romance', 'Sport Romance')
+    elif saga == 'Dark Forces':
+        return ('Romance', 'Romance Militar')
+    elif saga == 'Never Afert':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Twisted':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'North Shore':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Silver Pines Ranch':
+        return ('Romance', 'Cowboy Romance')
+    elif saga == 'Sky Ridge Hotshots':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'The Soldiers of Bedlam':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Sinners of Saint':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Society of Villains':
+        return ('Romance', 'Mafia Romance')
+    elif saga == 'Vipers':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Deception Trilogy':
+        return ('Romance', 'Mafia Romance')
+    elif saga == 'Throne Duet':
+        return ('Romance', 'Mafia Romance')
+    elif saga == 'Límites Prohibidos':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Bestias peligrosas':
+        return ('Romance', 'Mafia Romance')
+    elif saga == 'Entre Mafias':
+        return ('Romance', 'Mafia Romance')
+    elif saga == 'Cupido':
+        return ('Romance', 'Cowboy Romance')
+    elif saga == 'Arpias':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Maple Hills':
+        return ('Romance', 'Sport Romance')
+    elif saga == 'Rubí de sangre':
+        return ('Fantasía', 'Fantasía Romántica')
+    
+
+# 2. REGLAS POR TITULO: si el título es de un libro independiente 
+    elif 'Naturaleza de Escorpión' in str(titulo): # usamos 'in' por si el título varía un poco
+        return ('Romance', 'Dark Romance')
+    elif 'Love Hypothesis' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'love, Theoretically' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Love on the Brain' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Deep End' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'Lupara Bianca' in str(titulo):
+        return ('Romance', 'Mafia Romance')
+    elif 'Déjame atrás' in str(titulo):
+        return ('Romance', 'Romance Militar')
+    elif 'Maldita fortuna' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Petricor' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'In Stormy Weather' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Ira' in str(titulo):
+        return ('Romance', 'Dark Romance')
+    elif 'Descifrando a Cox' in str(titulo):
+        return ('Romance', 'Dark Romance')
+    elif 'Icebraker' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'Cuando caiga la nieve' in str(titulo):
+        return ('Romance', 'Romance Comtemporáneo')
+    elif 'El error vive arriba' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+
+# 3. MÁS AUTORES O SAGAS (Aquí irás añadiendo tus siguientes reglas poco a poco)
+    # elif autor == 'Nombre de Autora':
+    #     return ('Fantasía', 'Fantasía Romántica')
+    elif autor == 'Sarah J. Maas':
+        return ('Fantasía', 'Fantasía Romántica')
+    elif autor == 'Carmen Mola':
+        return ('Thriller', 'Thriller Policíaco')
+    elif autor == 'Emily Henry':
+        return ('Romance', 'Romance Contemporáneo')
+    elif autor == 'Violeta Reed':
+        return ('Romance', 'Romance Contemporáneo')
+    elif autor == 'Liz Tomforde':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Monty Jay':
+        return ('Romance', 'Dark Romance')
+    elif autor == 'Elle Kennedy':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Danielle Lori':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'Walker Rose':
+        return ('Romance', 'Romance Contemporáneo')
+    elif autor == 'Lyla Sage':
+        return ('Romance', 'Cowboy Romance')
+    elif autor == 'Jessica Peterson':
+        return ('Romance', 'Cowboy Romance')
+    elif autor == 'Bailey Hannah':
+        return ('Romance', 'Cowboy Romance')
+    elif autor == 'Elliot Rose':
+        return ('Romance', 'Cowboy Romance')
+    elif autor == 'H.M. Wolfe':
+        return ('Romance', 'Fantasía Romántica')
+    elif autor == 'Kristen Ciccarelli':
+        return ('Romance', 'Fantasía Románctica')
+    elif autor == 'Emilia Rossi':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'Neva Altaj':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'Mila García García':
+        return ('Romance', 'Dark Romance')
+    elif autor == 'Ana Serca':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'Becca Devereux':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'Grace Reilly':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Runyx':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'Somme Sketcher':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'Navessa Allen':
+        return ('Romance', 'Dark Romance')
+    elif autor == 'Adriana Criado':
+        return ('Romance', 'Cowboy Romance')
+    elif autor == 'Bailey Hannah':
+        return ('Romance', 'Cowboy Romance')
+    elif autor == 'Emily Rath':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Moruena Estríngana':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Stephanie Archer':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Lucy Score':
+        return ('Romance', 'Romance Contemporáneo')
+    elif autor == 'Eva Winners':
+        return ('Romance', 'Mafia Romance')
+    
+
+
+# 4. LIBROS SIN CLASIFICAR
+    else:
+        return ('Por clasificar', 'Por clasificar')
+
+# aplicamos la función a cada fila del DataFrame y creamos las nuevas columnas
+df_limpio[['Género', 'Subgénero']] = df_limpio.apply(clasificar_generos, axis=1, result_type='expand')
+
+# Comprobación de las nuevas columnas
+resultado_autor = df_limpio[df_limpio['Author'] == 'Neva Altaj']
+print('Resultado del autor Neva Altaj:')
+print(resultado_autor[['Title', 'Nombre_Saga', 'Género', 'Subgénero']].head(3))
+
+resultado_libro = df_limpio[df_limpio['Title'].str.contains('Maldita Fortuna', case=False, na=False)]
+print('Resultado del libro Maldita Fortuna:')
+print(resultado_libro[['Title', 'Author', 'Género', 'Subgénero']])

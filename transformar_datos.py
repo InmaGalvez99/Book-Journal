@@ -1,5 +1,11 @@
 import pandas as pd
 df = pd.read_csv('goodreads_library_export.csv')
+
+
+# Limpiar y convertir todas las columnas a minúsculas y reemplazar espacios por guiones bajos automáticamente
+df.columns = df.columns.str.lower().str.replace(' ', '_')
+
+
 print(f"Filas originales: {len(df)}")
 
 # Descartar las columnas que no queremos
@@ -19,7 +25,7 @@ print(df_limpio.columns.tolist())
 
 # --------------------------------------------------------------------------
 # Creamos la columna Formato y ponemos que todos los libros son Ebook
-df_limpio['Formato'] = 'Ebook'
+df_limpio['formato'] = 'Ebook'
 # escribirmos los libros que hemos leído en físico para identificar cuáles son ebook y cuáles físicos
 libros_físicos = [
     'mile',
@@ -75,24 +81,24 @@ libros_físicos = [
 
 # Si el título contiene alguna de estas palabras, cambia a Físico
 for libro in libros_físicos:
-    df_limpio.loc[df_limpio['Title'].str.contains(libro, case=False, na=False),'Formato'] = 'Físico'
+    df_limpio.loc[df_limpio['title'].str.contains(libro, case=False, na=False),'formato'] = 'Físico'
 
 # Comprobar cuántos han quedado de cada formato
 
-print(df_limpio['Formato'].value_counts())
+print(df_limpio['formato'].value_counts())
 
 # Imprimimos directamente los títulos filtrados sin bucles de por medio
-print(df_limpio[df_limpio['Formato'] == 'Físico']['Title'])
+print(df_limpio[df_limpio['formato'] == 'Físico']['title'])
 
 # 2. Eliminar el libro 'Mate' si está duplicado con 'Alfa'
 # Buscamos el índice de la fila donde el título sea 'Mate'
-indices_mate = df_limpio[df_limpio['Title'].str.contains('Mate', case=False, na=False)].index
+indices_mate = df_limpio[df_limpio['title'].str.contains('Mate', case=False, na=False)].index
 # 2. Usamos drop para eliminar esas filas del DataFrame
 df_limpio = df_limpio.drop(indices_mate)
 
 # 2. Eliminar el libro 'Right Move' que es el mismo que 'Jugando fuerte'
 # Buscamos el índice de la fila donde el título sea 'Mate'
-indices_rightmove = df_limpio[df_limpio['Title'].str.contains('Right Move', case=False, na=False)].index
+indices_rightmove = df_limpio[df_limpio['title'].str.contains('Right Move', case=False, na=False)].index
 # 2. Usamos drop para eliminar esas filas del DataFrame
 df_limpio = df_limpio.drop(indices_rightmove)
 
@@ -102,15 +108,15 @@ df_limpio = df_limpio.drop(indices_rightmove)
 # ----------------------------------------------------------------------------
 
 # 1 Extraer los textos de los paréntesis y dejarlos como dos columnas auxiliares sin alterar el texto. 
-df_limpio['parentesis_1'] = df_limpio['Title'].str.extract(r'\(([^)]+)\)', expand=False)
-todos_p = df_limpio['Title'].str.findall(r'\(([^)]+)\)')
+df_limpio['parentesis_1'] = df_limpio['title'].str.extract(r'\(([^)]+)\)', expand=False)
+todos_p = df_limpio['title'].str.findall(r'\(([^)]+)\)')
 df_limpio['parentesis_2'] = todos_p.apply(lambda x: x[1] if isinstance(x, list) and len(x) > 1 else None)
 
 # 2 Creamos la columna Edicion
 es_edicion_1 = df_limpio['parentesis_1'].str.contains(r'Spanish|Edition|Version|latino', case=False, na=False)
-df_limpio['Edicion'] = df_limpio['parentesis_2']
-df_limpio.loc[es_edicion_1, 'Edicion'] = df_limpio['parentesis_1']
-df_limpio['Edicion'] = df_limpio['Edicion'].fillna('None')
+df_limpio['edicion'] = df_limpio['parentesis_2']
+df_limpio.loc[es_edicion_1, 'edicion'] = df_limpio['parentesis_1']
+df_limpio['edicion'] = df_limpio['edicion'].fillna('None')
 
 # 3 Nombre_Saga y Orden_Saga
 # Creamos una columna auxiliar con el contenido del primer paréntesis que NO sea edición
@@ -119,20 +125,20 @@ primer_parentesis_saga = df_limpio['parentesis_1'].copy()
 primer_parentesis_saga[es_edicion_1] = None
 
 # Columna Nombre_Saga: Quitamos todo lo que venga después de coma, #, nº para quedarnos solo con el nombre de la saga
-df_limpio['Nombre_Saga'] = primer_parentesis_saga.str.replace(r',.*|#.*|n°.*', '', regex=True).str.strip()
+df_limpio['nombre_saga'] = primer_parentesis_saga.str.replace(r',.*|#.*|n°.*', '', regex=True).str.strip()
 # Los huecos vacíos o sin saga son libros únicos
-df_limpio['Nombre_Saga'] = df_limpio['Nombre_Saga'].fillna('Libro único')
+df_limpio['nombre_saga'] = df_limpio['nombre_saga'].fillna('Libro único')
 
 # Columna Orden_Saga: Extraemos el número de saga si existe, sino dejamos 0.Primeor buscamos # o nº si existe
-df_limpio['Orden_Saga'] = primer_parentesis_saga.str.extract(r'(?:#|n°)\s*(\d+)', expand=False)
+df_limpio['orden_saga'] = primer_parentesis_saga.str.extract(r'(?:#|n°)\s*(\d+)', expand=False)
 # y si no tiene número de saga, dejamos 0
-df_limpio['Orden_Saga'] = df_limpio['Orden_Saga'].fillna(0)
+df_limpio['orden_saga'] = df_limpio['orden_saga'].fillna(0)
 
 # 4 Limpiar columna titulo original
-df_limpio['Title'] = df_limpio['Title'].str.replace(r'\s*\([^)]*\)', '', regex=True).str.strip()
+df_limpio['title'] = df_limpio['title'].str.replace(r'\s*\([^)]*\)', '', regex=True).str.strip()
 # Comprobación
 print('Resultado final:')
-print(df_limpio[['Title', 'Nombre_Saga', 'Orden_Saga', 'Edicion']].head(10))
+print(df_limpio[['title', 'nombre_saga', 'orden_saga', 'edicion']].head(10))
 
 # COMPROBAR LAS 2 PRIMERAS FILAS TRAS LAS TRANSFORMACIONES
 print('Primeras filas tras las transformaciones:')
@@ -141,10 +147,7 @@ print('Listado de columnas:', list(df_limpio.columns))
 
 # Eliminar  columnas parentesis 1 y parentesis 2
 df_limpio = df_limpio.drop(columns=['parentesis_1',
-                                    'parentesis_2',
-                                    'Date Added', 
-                                    'Binding',
-                                    'Year Published'])
+                                    'parentesis_2'])
 print('Listado de columnas:', list(df_limpio.columns))
 
 
@@ -153,9 +156,9 @@ print('Listado de columnas:', list(df_limpio.columns))
 # -------------------------------------------------------------------------------------------
 
 def clasificar_generos(row):
-    saga = row['Nombre_Saga']
-    autor = row['Author']
-    titulo = row['Title']
+    saga = row['nombre_saga']
+    autor = row['author']
+    titulo = row['title']
 
 # 1. REGLAS PARA SAGA: barre de un plumazo los libros de la misma saga
 
@@ -397,87 +400,61 @@ def clasificar_generos(row):
         return ('Por clasificar', 'Por clasificar')
 
 # aplicamos la función a cada fila del DataFrame y creamos las nuevas columnas
-df_limpio[['Género', 'Subgénero']] = df_limpio.apply(clasificar_generos, axis=1, result_type='expand')
+df_limpio[['genero', 'subgenero']] = df_limpio.apply(clasificar_generos, axis=1, result_type='expand')
 
 # Comprobación de las nuevas columnas
-resultado_autor = df_limpio[df_limpio['Author'] == 'Neva Altaj']
+resultado_autor = df_limpio[df_limpio['author'] == 'Neva Altaj']
 print('Resultado del autor Neva Altaj:')
-print(resultado_autor[['Title', 'Nombre_Saga', 'Género', 'Subgénero']].head(3))
+print(resultado_autor[['title', 'nombre_saga', 'genero', 'subgenero']].head(3))
 
-resultado_libro = df_limpio[df_limpio['Title'].str.contains('Maldita Fortuna', case=False, na=False)]
+resultado_libro = df_limpio[df_limpio['title'].str.contains('Maldita Fortuna', case=False, na=False)]
 print('Resultado del libro Maldita Fortuna:')
-print(resultado_libro[['Title', 'Author', 'Género', 'Subgénero']])
+print(resultado_libro[['title', 'author', 'genero', 'subgenero']])
 
 # Comprobar los libros por clasificar
 
-pendientes = df_limpio [df_limpio['Género']=='Por Clasificar']
+pendientes = df_limpio [df_limpio['genero']=='Por Clasificar']
 print(f"¡Te quedan {len(pendientes)} libros por clasificar!")
-print(pendientes[['Title', 'Author', 'Nombre_Saga']].head(15))
+print(pendientes[['title', 'author', 'nombre_saga']].head(15))
 
 
 # ----------------------------------------------------------------------------------------
 # CARGA DE DATOS BBDD SQL SERVER
 # ----------------------------------------------------------------------------------------
 
-from sqlalchemy import create_engine
-import urllib
-
-# 1. Configuración de la conexión a tu SQL Server local
-server = 'INMAPC\SQLEXPRESS'          # Cambia esto si tu instancia tiene otro nombre (ej: 'localhost\\SQLEXPRESS')
-database_name = 'DB_BookJournal' # El nombre de tu base de datos actual
-
-# Creamos la cadena de conexión usando autenticación de Windows
-params = urllib.parse.quote_plus(
-    f"DRIVER={{ODBC Driver 17 for SQL Server}};"
-    f"SERVER={server};"
-    f"DATABASE={database_name};"
-    f"Trusted_Connection=yes;"
-)
-
-engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
-
-# 2. Volcamos el DataFrame limpio a SQL Server
-# 'if_exists="replace"' borra la tabla antigua y la sustituye por la nueva con todos los cambios y géneros actualizados
-df_limpio.to_sql('Libros_Limpios', con=engine, if_exists='replace', index=False)
-
-print("¡Carga completada con éxito! La base de datos en SQL Server está actualizada. ")
-
-
-
-# -------------------------------------------------
-# CARGAR DATOS A SQL
-# -------------------------------------------------
 
 import pandas as pd
 from sqlalchemy import create_engine
 import urllib
 
 # 1. CREAR LAS DIMENSIONES A PARTIR DE TU `df_limpio` YA EXISTENTE
-dim_autores = df_limpio[['Author']].drop_duplicates().reset_index(drop=True)
-dim_autores['Autor_ID'] = dim_autores.index + 1
+dim_autores = df_limpio[['author']].drop_duplicates().reset_index(drop=True)
+dim_autores['autor_id'] = dim_autores.index + 1
 
-dim_publisher = df_limpio[['Publisher']].drop_duplicates().reset_index(drop=True)
-dim_publisher['Publisher_ID'] = dim_publisher.index + 1
+dim_publisher = df_limpio[['publisher']].drop_duplicates().reset_index(drop=True)
+dim_publisher['publisher_id'] = dim_publisher.index + 1
 
-dim_generos = df_limpio[['Género', 'Subgénero']].drop_duplicates().reset_index(drop=True)
-dim_generos['Genero_ID'] = dim_generos.index + 1
+dim_generos = df_limpio[['genero', 'subgenero']].drop_duplicates().reset_index(drop=True)
+dim_generos['genero_id'] = dim_generos.index + 1
 
-dim_sagas = df_limpio[['Nombre_Saga']].drop_duplicates().reset_index(drop=True)
-dim_sagas['Saga_ID'] = dim_sagas.index + 1
+dim_sagas = df_limpio[['nombre_saga']].drop_duplicates().reset_index(drop=True)
+dim_sagas['saga_id'] = dim_sagas.index + 1
 
 # 2. CONSTRUIR LA TABLA DE HECHOS (Fact_Libros)
-fact_libros = df_limpio.merge(dim_autores, on='Author', how='left')
-fact_libros = fact_libros.merge(dim_publisher, on='Publisher', how='left')
-fact_libros = fact_libros.merge(dim_generos, on=['Género', 'Subgénero'], how='left')
-fact_libros = fact_libros.merge(dim_sagas, on='Nombre_Saga', how='left')
+fact_libros = df_limpio.merge(dim_autores, on='author', how='left')
+fact_libros = fact_libros.merge(dim_publisher, on='publisher', how='left')
+fact_libros = fact_libros.merge(dim_generos, on=['genero', 'subgenero'], how='left')
+fact_libros = fact_libros.merge(dim_sagas, on='nombre_saga', how='left')
+
 
 columnas_fact = [
-    'Book Id', 'Title', 'ISBN', 'ISBN13', 'My Rating', 'Number of Pages', 
-    'Original Publication Year', 'Date Read', 'Exclusive Shelf', 'Read Count', 
-    'Formato', 'Edicion', 'Orden_Saga',
-    'Autor_ID', 'Publisher_ID', 'Genero_ID', 'Saga_ID'
+    'book_id', 'title', 'isbn', 'isbn13', 'my_rating', 'number_of_pages',
+    'original_publication_year', 'date_read', 'exclusive_shelf', 'read_count',
+    'formato', 'edicion', 'orden_saga',
+    'autor_id', 'publisher_id', 'genero_id', 'saga_id'
 ]
 fact_libros = fact_libros[columnas_fact]
+
 
 # 3. CONFIGURACIÓN DE LA CONEXIÓN A SQL SERVER (con la 'r' para evitar el warning)
 server = r'INMAPC\SQLEXPRESS'
@@ -492,11 +469,14 @@ params = urllib.parse.quote_plus(
 
 engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
 
+
+
+
 # 4. CARGA DE LAS TABLAS A SQL SERVER
-dim_autores.to_sql('Dim_Autores', con=engine, if_exists='replace', index=False)
-dim_publisher.to_sql('Dim_Publisher', con=engine, if_exists='replace', index=False)
-dim_generos.to_sql('Dim_Generos', con=engine, if_exists='replace', index=False)
-dim_sagas.to_sql('Dim_Sagas', con=engine, if_exists='replace', index=False)
-fact_libros.to_sql('Fact_Libros', con=engine, if_exists='replace', index=False)
+dim_autores.to_sql('DimAutores', con=engine, if_exists='replace', index=False)
+dim_publisher.to_sql('DimPublisher', con=engine, if_exists='replace', index=False)
+dim_generos.to_sql('DimGeneros', con=engine, if_exists='replace', index=False)
+dim_sagas.to_sql('DimSagas', con=engine, if_exists='replace', index=False)
+fact_libros.to_sql('FactLibros', con=engine, if_exists='replace', index=False)
 
 print("¡Modelo en estrella creado y volcado a SQL Server con éxito! ")

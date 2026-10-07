@@ -261,7 +261,7 @@ def clasificar_generos(row):
     elif 'Icebraker' in str(titulo):
         return ('Romance', 'Sport Romance')
     elif 'Cuando caiga la nieve' in str(titulo):
-        return ('Romance', 'Romance Comtemporáneo')
+        return ('Romance', 'Romance Contemporáneo')
     elif 'El error vive arriba' in str(titulo):
         return ('Romance', 'Romance Contemporáneo')
     elif 'Fever Dream' in str(titulo):
@@ -330,9 +330,9 @@ def clasificar_generos(row):
     elif autor == 'Elliot Rose':
         return ('Romance', 'Cowboy Romance')
     elif autor == 'H.M. Wolfe':
-        return ('Romance', 'Fantasía Romántica')
+        return ('Fantasía', 'Fantasía Romántica')
     elif autor == 'Kristen Ciccarelli':
-        return ('Romance', 'Fantasía Románctica')
+        return ('Fantasía', 'Fantasía Romántica')
     elif autor == 'Emilia Rossi':
         return ('Romance', 'Mafia Romance')
     elif autor == 'Neva Altaj':
@@ -416,6 +416,15 @@ print(resultado_libro[['title', 'author', 'genero', 'subgenero']])
 pendientes = df_limpio [df_limpio['genero']=='Por Clasificar']
 print(f"¡Te quedan {len(pendientes)} libros por clasificar!")
 print(pendientes[['title', 'author', 'nombre_saga']].head(15))
+
+
+# CORREGIR LIBROS SIN EDITORIAL
+
+# 1. Rellenar los huecos vacíos heredando la editorial de los libros de la misma saga
+df_limpio['publisher'] = df_limpio.groupby('nombre_saga')['publisher'].bfill().ffill()
+
+# 2. Para los libros que no tienen saga o siguen sin editorial, poner un texto limpio
+df_limpio['publisher'] = df_limpio['publisher'].fillna('Autopublicado')
 
 
 # ----------------------------------------------------------------------------------------

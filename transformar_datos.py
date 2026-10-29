@@ -125,7 +125,7 @@ primer_parentesis_saga = df_limpio['parentesis_1'].copy()
 primer_parentesis_saga[es_edicion_1] = None
 
 # Columna Nombre_Saga: Quitamos todo lo que venga después de coma, #, nº para quedarnos solo con el nombre de la saga
-df_limpio['nombre_saga'] = primer_parentesis_saga.str.replace(r',.*|#.*|n°.*', '', regex=True).str.strip()
+df_limpio['nombre_saga'] = primer_parentesis_saga.str.replace(r'\s*(?:nº|#)?\s*[,\.]?\s*\d*\.?\d+', '', case=False, regex=True).str.strip().str.rstrip(',. ')
 # Los huecos vacíos o sin saga son libros únicos
 df_limpio['nombre_saga'] = df_limpio['nombre_saga'].fillna('Libro único')
 
@@ -133,6 +133,33 @@ df_limpio['nombre_saga'] = df_limpio['nombre_saga'].fillna('Libro único')
 df_limpio['orden_saga'] = primer_parentesis_saga.str.extract(r'(?:#|n°)\s*(\d+)', expand=False)
 # y si no tiene número de saga, dejamos 0
 df_limpio['orden_saga'] = df_limpio['orden_saga'].fillna(0)
+
+
+# Un diccionario donde defines: "Si Goodreads dice X, cámbialo automáticamente por Y"
+correcciones_sagas = {
+    'Gold Rush Ranch,.5': 'Gold Rush Ranch',
+    'Sky Ridge Hotshots': 'Bomberos De Sky Ridge',
+    'D. C. Stars': 'D.C. Stars',
+    # Aquí puedes añadir cualquier errata rara que te suelte Goodreads en el futuro
+}
+
+correcciones_autor = {
+    'Mila García García': 'Mila  García'
+}
+# El script busca en el CSV y aplica los cambios de golpe de forma automática
+df_limpio['nombre_saga'] = df_limpio['nombre_saga'].replace(correcciones_sagas)
+df_limpio['author'] = df_limpio['author'].replace(correcciones_autor)
+
+# Forzar los 5 libros de Elsie Silver a la saga Gold Rush Ranch de forma automática
+libros_gold_rush = ['Aprender a ganar', 'Ganar siempre', 'Ganar a toda costa', 'Salir a ganar', 'Ganar al límite']
+df_limpio.loc[df_limpio['title'].isin(libros_gold_rush), 'nombre_saga'] = 'Gold Rush Ranch'
+
+# Y para los números de orden o excepciones concretas por título, puedes dejar el .loc que ya tienes:
+df_limpio.loc[df_limpio['title'].str.contains('Josh', case=False, na=False), 'orden_saga'] = 3
+df_limpio.loc[df_limpio['title'].str.contains('Arráncame el corazón', case=False, na=False), 'nombre_saga'] = 'Dark Forces'
+df_limpio.loc[df_limpio['title'].str.contains('Arráncame el corazón', case=False, na=False), 'orden_saga'] = 1
+df_limpio.loc[df_limpio['title'].str.contains('Icebreaker', case=False, na=False), 'nombre_saga'] = 'Maple Hills'
+df_limpio.loc[df_limpio['title'].str.contains('El emperador', case=False, na=False), 'nombre_saga'] = 'Dark Verse'
 
 # 4 Limpiar columna titulo original
 df_limpio['title'] = df_limpio['title'].str.replace(r'\s*\([^)]*\)', '', regex=True).str.strip()
@@ -167,7 +194,7 @@ def clasificar_generos(row):
     elif saga == 'No es amor':
         return ('Romance', 'Romance Contemporáneo')
     elif saga == 'Bride':
-        return ('Fantasía', 'Romance Paranormal')
+        return ('Fantasía', 'Fantasía Paranormal')
     elif saga == 'Legacy of Gods':
         return ('Romance', 'Dark Romance')
     elif saga == 'Chestnut Springs':
@@ -178,16 +205,14 @@ def clasificar_generos(row):
         return ('Romance', 'Sport Romance')
     elif saga == 'Dark Forces':
         return ('Romance', 'Romance Militar')
-    elif saga == 'Never Afert':
+    elif saga == 'Never After':
         return ('Romance', 'Dark Romance')
     elif saga == 'Twisted':
         return ('Romance', 'Dark Romance')
     elif saga == 'North Shore':
         return ('Romance', 'Dark Romance')
-    elif saga == 'Silver Pines Ranch':
+    elif saga == 'Silver Pines':
         return ('Romance', 'Cowboy Romance')
-    elif saga == 'Sky Ridge Hotshots':
-        return ('Romance', 'Romance Contemporáneo')
     elif saga == 'The Soldiers of Bedlam':
         return ('Romance', 'Dark Romance')
     elif saga == 'Sinners of Saint':
@@ -208,7 +233,7 @@ def clasificar_generos(row):
         return ('Romance', 'Mafia Romance')
     elif saga == 'Cupido':
         return ('Romance', 'Cowboy Romance')
-    elif saga == 'Arpias':
+    elif saga == 'Arpías':
         return ('Romance', 'Dark Romance')
     elif saga == 'Maple Hills':
         return ('Romance', 'Sport Romance')
@@ -222,23 +247,43 @@ def clasificar_generos(row):
         return ('Romance', 'Sport Romance')
     elif saga == 'Dreamland Billionaires':
         return ('Romance', 'Romance Contemporáneo')
-    elif saga == 'Gold Rush Runch':
+    elif saga == 'Gold Rush Ranch':
         return ('Romance',  'Cowboy Romance')
     elif saga == 'Royal Elite':
         return ('Romance','Dark Romance')
-    elif saga == 'Speed':
-        return ('Romance', 'Dark Romance')
     elif saga == 'Villain':
         return ('Romance', 'Dark Romance')
+    elif saga == 'Lucky River Ranch':
+        return ('Romance', 'Cowboy Romance')
+    elif saga == 'Vancouver Storm':
+        return ('Romance', 'Sport Romance')
+    elif saga == 'D.C. Stars':
+        return ('Romance', 'Sport Romance')
+    elif saga == 'Wild Warriors':
+        return ('Romance', 'Sport Romance')
+    elif saga == ('Silver Pines Ranch'):
+        return ('Romance', 'Cowboy Romance')
+    elif saga == 'Bomberos De Sky Ridge':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'Serie Speed':
+        return ('Romance', 'Dark Romance')
+    elif saga == 'Campus Drivers':
+        return ('Romance', 'Romance Contemporáneo')
+    elif saga == 'Dark Verse':
+        return ('Romance', 'Mafia Romance')
+   
+    
+
+    
     
     
 
 # 2. REGLAS POR TITULO: si el título es de un libro independiente 
-    elif 'Naturaleza de Escorpión' in str(titulo): # usamos 'in' por si el título varía un poco
+    elif 'Naturaleza de escorpión' in str(titulo): # usamos 'in' por si el título varía un poco
         return ('Romance', 'Dark Romance')
     elif 'Love Hypothesis' in str(titulo):
         return ('Romance', 'Romance Contemporáneo')
-    elif 'love, Theoretically' in str(titulo):
+    elif 'Love, Theoretically' in str(titulo):
         return ('Romance', 'Romance Contemporáneo')
     elif 'Love on the Brain' in str(titulo):
         return ('Romance', 'Romance Contemporáneo')
@@ -296,7 +341,68 @@ def clasificar_generos(row):
         return ('Romance', 'Romance Contemporáneo')
     elif 'End game' in str(titulo):
         return ('Romance', 'Sport Romance')
-    
+    elif 'Alfa' in str(titulo):
+        return ('Fantasía', 'Fantasía Paranormal')
+    elif 'Muñeca rusa' in str(titulo):
+        return ('Romance', 'Mafia Romance')
+    elif 'Koroleva: Los villanos también se enamoran'in str(titulo):
+        return ('Romance', 'Mafia Romance')
+    elif 'Un corazón indomable' in str(titulo):
+        return ('Romance', 'Cowboy Romance')
+    elif 'Sean' in str(titulo):
+        return ('Romance', 'Dark Romance')
+    elif 'Chicas como tú para tipos como yo' in str (titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Princesa de polvo y sangre' in str (titulo):
+        return ('Romance', 'Mafia Romance')
+    elif 'Juego de dos' in str (titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Cariño, cuánto te odio' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Amor por encargo' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'De Lukov, Com Amor' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'La hipótesis del amor' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Heated Rivalry' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'Fuego' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Un rollo académico' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Un desastre navideño llamado amor' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Un otoño en Bramble Falls' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Burnout' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Mortalmente tuya' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Ganar siempre' in str(titulo):
+        return ('Romance', 'Cowboy Romance')
+    elif 'Aprender a ganar' in str(titulo):
+        return ('Romance', 'Cowboy Romance')
+    elif 'Hate Mail' in str(titulo):
+        return ('Romance', 'Sport Romance')
+    elif 'First-Time Caller' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Bratva Bride' in str(titulo):
+        return ('Romance', 'Mafia Romance')
+    elif 'Mortal & Inmortal' in str (titulo):
+        return ('Fantasía', 'Fantasía Paranormal')
+    elif 'Persuasiva y poética' in str(titulo):
+        return ('Romance', 'Mafia Romance')
+    elif 'Fragile Sanctuary' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'Sanguinaria' in str(titulo):
+        return ('Fantasía', 'Fantasía Romántica')
+    elif 'Llueva o truene' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+    elif 'And Now, Back to You' in str(titulo):
+        return ('Romance', 'Romance Contemporáneo')
+
+
 
     
 
@@ -333,8 +439,6 @@ def clasificar_generos(row):
         return ('Fantasía', 'Fantasía Romántica')
     elif autor == 'Kristen Ciccarelli':
         return ('Fantasía', 'Fantasía Romántica')
-    elif autor == 'Emilia Rossi':
-        return ('Romance', 'Mafia Romance')
     elif autor == 'Neva Altaj':
         return ('Romance', 'Mafia Romance')
     elif autor == 'Mila García García':
@@ -353,13 +457,9 @@ def clasificar_generos(row):
         return ('Romance', 'Dark Romance')
     elif autor == 'Adriana Criado':
         return ('Romance', 'Cowboy Romance')
-    elif autor == 'Bailey Hannah':
-        return ('Romance', 'Cowboy Romance')
     elif autor == 'Emily Rath':
         return ('Romance', 'Sport Romance')
     elif autor == 'Moruena Estríngana':
-        return ('Romance', 'Sport Romance')
-    elif autor == 'Stephanie Archer':
         return ('Romance', 'Sport Romance')
     elif autor == 'Lucy Score':
         return ('Romance', 'Romance Contemporáneo')
@@ -369,7 +469,7 @@ def clasificar_generos(row):
         return ('Romance', 'Sport Romance')
     elif autor == 'Brynne Weaver':
         return ('Romance', 'Dark Romance')
-    elif autor == 'Elena Armas':
+    elif autor == 'Elena  Armas':
         return ('Romance', 'Romance Contemporáneo')
     elif autor == 'Lynn Painter':
         return ('Romance', 'Sport Romance')
@@ -391,6 +491,21 @@ def clasificar_generos(row):
         return ('Romance', 'Sport Romance')
     elif autor == 'Kandi Steiner':
         return ('Romance', 'Sport Romance')
+    elif autor == 'Abby Jimenez':
+        return ('Romance', 'Romance Contemporáneo')
+    elif autor =='Jagger Cole':
+        return ('Romance', 'Mafia Romance')
+    elif autor =='Emilia  Rossi':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'Ygritte Berlana':
+        return ('Romance', 'Sport Romance')
+    elif autor == 'Elliott Rose':
+        return ('Romance', 'Cowboy Romance')
+    elif autor == 'Mila  García':
+        return ('Romance', 'Mafia Romance')
+    elif autor == 'RuNyx':
+        return ('Romance', 'Mafia Romance')
+
  
     
 
@@ -446,7 +561,15 @@ dim_publisher['publisher_id'] = dim_publisher.index + 1
 dim_generos = df_limpio[['genero', 'subgenero']].drop_duplicates().reset_index(drop=True)
 dim_generos['genero_id'] = dim_generos.index + 1
 
-dim_sagas = df_limpio[['nombre_saga']].drop_duplicates().reset_index(drop=True)
+# 0. Limpiamos espacios invisibles en los nombres de las sagas para que no se dupliquen por erratas de formato
+df_limpio['nombre_saga'] = df_limpio['nombre_saga'].astype(str).str.strip().str.title()
+
+# Por si acaso arrastraba un saga_id antiguo del CSV o de antes, lo borramos para evitar conflictos
+if 'saga_id' in df_limpio.columns:
+    df_limpio = df_limpio.drop(columns=['saga_id'])
+
+# 1. Creamos la dimensión de sagas limpia y única
+dim_sagas = df_limpio[['nombre_saga']].dropna(subset=['nombre_saga']).drop_duplicates().reset_index(drop=True)
 dim_sagas['saga_id'] = dim_sagas.index + 1
 
 # 2. CONSTRUIR LA TABLA DE HECHOS (Fact_Libros)
@@ -489,3 +612,7 @@ dim_sagas.to_sql('DimSagas', con=engine, if_exists='replace', index=False)
 fact_libros.to_sql('FactLibros', con=engine, if_exists='replace', index=False)
 
 print("¡Modelo en estrella creado y volcado a SQL Server con éxito! ")
+
+
+# Corregir genero y subgenero de libros que están Por clasificar.
+

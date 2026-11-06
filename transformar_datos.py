@@ -140,6 +140,13 @@ correcciones_sagas = {
     'Gold Rush Ranch,.5': 'Gold Rush Ranch',
     'Sky Ridge Hotshots': 'Bomberos De Sky Ridge',
     'D. C. Stars': 'D.C. Stars',
+    'Bride':'Novia',
+    'Hollow Boys': 'The Hollow Boys',
+    '#Kiss Me': 'Kiss Me',
+    'Pecados': 'Kings of Sin',
+    'Dioses Del Juego': 'Gods Of The Game',
+    'Windy City': 'La Ciudad De Los Vientos',
+    'Silver Pines':'Silver Pines Ranch',
     # Aquí puedes añadir cualquier errata rara que te suelte Goodreads en el futuro
 }
 
@@ -160,6 +167,7 @@ df_limpio.loc[df_limpio['title'].str.contains('Arráncame el corazón', case=Fal
 df_limpio.loc[df_limpio['title'].str.contains('Arráncame el corazón', case=False, na=False), 'orden_saga'] = 1
 df_limpio.loc[df_limpio['title'].str.contains('Icebreaker', case=False, na=False), 'nombre_saga'] = 'Maple Hills'
 df_limpio.loc[df_limpio['title'].str.contains('El emperador', case=False, na=False), 'nombre_saga'] = 'Dark Verse'
+df_limpio.loc[df_limpio['title'].str.contains('The Defender', case=False, na=False), 'nombre_saga'] = 'Dioses Del Juego'
 
 # 4 Limpiar columna titulo original
 df_limpio['title'] = df_limpio['title'].str.replace(r'\s*\([^)]*\)', '', regex=True).str.strip()
@@ -193,7 +201,7 @@ def clasificar_generos(row):
         return ('Romance', 'Mafia Romance')
     elif saga == 'No es amor':
         return ('Romance', 'Romance Contemporáneo')
-    elif saga == 'Bride':
+    elif saga == 'Novia':
         return ('Fantasía', 'Fantasía Paranormal')
     elif saga == 'Legacy of Gods':
         return ('Romance', 'Dark Romance')
@@ -239,9 +247,7 @@ def clasificar_generos(row):
         return ('Romance', 'Sport Romance')
     elif saga == 'Rubí de sangre':
         return ('Fantasía', 'Fantasía Romántica')
-    elif saga == 'Kings of Sin':
-        return ('Romance', 'Romance Contemporáneo')
-    elif saga == 'Pecados':
+    elif saga in ['Kings of Sin', 'Pecados']:
         return ('Romance', 'Romance Contemporáneo')
     elif saga == 'Dirty Air':
         return ('Romance', 'Sport Romance')
